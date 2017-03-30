@@ -22,6 +22,8 @@ import (
 	"github.com/hyperledger/fabric/events/producer"
 	"github.com/hyperledger/fabric/protos/common"
 	"github.com/op/go-logging"
+	"github.com/GuardTime/go-ksi"
+	"github.com/kelseyhightower/envconfig"
 )
 
 //--------!!!IMPORTANT!!-!!IMPORTANT!!-!!IMPORTANT!!---------
@@ -48,6 +50,21 @@ func NewLedgerCommitter(ledger ledger.PeerLedger, validator txvalidator.Validato
 	return &LedgerCommitter{ledger: ledger, validator: validator}
 }
 
+func initKSIContext() (*ksi.KSI, error) {
+	var s ksi.ClientSettings
+    // Using envconfig to load the KSI ClientSettings from the environment
+	envconfig.Process("gt", &s)
+	signer, err := ksi.NewKSIFromClientSettings(s)
+	if err != nil {
+        return nil, err
+	}
+	err = signer.SetPubFileUrl("http://verify.guardtime.com/ksi-publications.bin","ryan.elliott@guardtime.com")
+	if err != nil {
+        return nil, err
+	}
+	return signer, nil
+}
+
 // Commit commits block to into the ledger
 // Note, it is important that this always be called serially
 func (lc *LedgerCommitter) Commit(block *common.Block) error {
@@ -60,6 +77,24 @@ func (lc *LedgerCommitter) Commit(block *common.Block) error {
 	if err := lc.ledger.Commit(block); err != nil {
 		return err
 	}
+	logger.Infof("Successfully committed block %d with hash %s", block.Header.Number, string(block.Header.DataHash) )
+	logger.Infof("Connecting to the Gateway.")
+	signer, err := initKSIContext()
+	if( err != nil ) {
+		logger.Errorf("Error while connecting to the Gateway ",err)
+	} else {
+		logger.Infof("Generating KSI Signature...")
+		signer.SetLogLevel(ksi.LogLevelDebug)
+		testdata := []byte("foobarbaz")
+
+		sig, err := signer.Sign(testdata)
+		if err != nil {
+			logger.Errorf("Unable to sign bytes. Error: %v\n", err.Error())
+		} else {
+			logger.Infof("Signature : ", sig)
+		}
+	}
+	
 
 	// send block event *after* the block has been committed
 	if err := producer.SendProducerBlockEvent(block); err != nil {

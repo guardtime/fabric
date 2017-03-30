@@ -167,11 +167,16 @@ build/docker/bin/%: $(PROJECT_FILES)
 	@echo "Building $@"
 	@mkdir -p build/docker/bin build/docker/$(TARGET)/pkg
 	@$(DRUN) \
+		-v $(abspath .)/../../../github.com:/opt/gopath/src/github.com \
 		-v $(abspath build/docker/bin):/opt/gopath/bin \
 		-v $(abspath build/docker/$(TARGET)/pkg):/opt/gopath/pkg \
-		$(BASE_DOCKER_NS)/fabric-baseimage:$(BASE_DOCKER_TAG) \
+		build-ksi-lib \
 		go install -ldflags "$(DOCKER_GO_LDFLAGS)" $(pkgmap.$(@F))
 	@touch $@
+# -v /usr/local/include:/usr/local/include \
+# -v $(abspath .)/../../../github.com/GuardTime/go-ksi/lib:/usr/local/lib \
+# old image was....    
+#		hyperledger/fabric-baseimage:$(BASE_DOCKER_TAG) \
 
 build/bin:
 	mkdir -p $@
