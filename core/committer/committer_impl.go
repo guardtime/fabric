@@ -95,6 +95,12 @@ func (lc *LedgerCommitter) Commit(block *common.Block) error {
 	}
 	
 
+
+	logger.Infof("Adding the KSI Signature to the Block metadata.")
+	signature := []byte("Hello ")
+	block.Metadata.Metadata = append(block.Metadata.Metadata, signature);
+	logger.Infof("Now, the metadata array has %d elements",len(block.Metadata.Metadata))
+
 	// send block event *after* the block has been committed
 	if err := producer.SendProducerBlockEvent(block); err != nil {
 		logger.Errorf("Error publishing block %d, because: %v", block.Header.Number, err)
