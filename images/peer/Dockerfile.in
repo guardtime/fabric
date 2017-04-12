@@ -1,4 +1,4 @@
-FROM _BASE_NS_/fabric-baseos:_BASE_TAG_
+FROM build-ksi-lib
 ENV PEER_CFG_PATH /etc/hyperledger/fabric
 ENV CORE_PEER_MSPCONFIGPATH $PEER_CFG_PATH/msp/sampleconfig
 RUN mkdir -p /var/hyperledger/production $PEER_CFG_PATH
