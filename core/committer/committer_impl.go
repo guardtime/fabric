@@ -53,12 +53,12 @@ func NewLedgerCommitter(ledger ledger.PeerLedger, validator txvalidator.Validato
 func initKSIContext() (*ksi.KSI, error) {
 	var s ksi.ClientSettings
     // Using envconfig to load the KSI ClientSettings from the environment
-	envconfig.Process("gt", &s)
+	envconfig.Process("ksi", &s)
 	signer, err := ksi.NewKSIFromClientSettings(s)
 	if err != nil {
         return nil, err
 	}
-	err = signer.SetPubFileUrl("http://verify.guardtime.com/ksi-publications.bin","ryan.elliott@guardtime.com")
+	err = signer.SetPubFileUrl("http://verify.guardtime.com/ksi-publications.bin","publications@guardtime.com")
 	if err != nil {
         return nil, err
 	}
