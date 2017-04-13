@@ -85,16 +85,20 @@ func (lc *LedgerCommitter) Commit(block *common.Block) error {
 		logger.Debug("Generating KSI Signature ...")
 		
 		signer.SetLogLevel(ksi.LogLevelInfo)
-		testdata := []byte("foobarbaz")
-		sig, err := signer.Sign(testdata)
+		sig, err := signer.Sign(block.Header.DataHash)
 		if err != nil {
 			logger.Errorf("Unable to sign bytes. Error: %v\n", err.Error())
 		} else {
 			logger.Debug("Signature : ", sig)
 			logger.Debug("Adding the KSI Signature to the Block metadata.")
-			signatureBytes := sig.Bytes()
-			block.Metadata.Metadata = append(block.Metadata.Metadata, signatureBytes);
 			logger.Debug("Now, the metadata array has %d elements",len(block.Metadata.Metadata))
+			signatureBytes, err := sig.Bytes()
+			if err != nil {
+				logger.Errorf("Failed to serialize the KSI Signature to raw bytes. Error: %v\n", err.Error())
+			} else {
+				block.Metadata.Metadata = append(block.Metadata.Metadata, signatureBytes);
+				logger.Debugf("Now, the metadata array has %d elements",len(block.Metadata.Metadata))
+			}
 		}
 	}
 	
