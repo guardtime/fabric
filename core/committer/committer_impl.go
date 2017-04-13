@@ -77,21 +77,19 @@ func (lc *LedgerCommitter) Commit(block *common.Block) error {
 	if err := lc.ledger.Commit(block); err != nil {
 		return err
 	}
-	logger.Debug("Successfully committed block %d with hash %s", block.Header.Number, string(block.Header.DataHash) )
+	logger.Debugf("Successfully committed block %d with hash %x ", block.Header.Number, block.Header.DataHash )
 	signer, err := initKSIContext()
 	if( err != nil ) {
 		logger.Errorf("Error while connecting to the KSI Gateway ",err)
 	} else {
-		logger.Debug("Generating KSI Signature ...")
+		logger.Debugf("Generating KSI Signature ...")
 		
 		signer.SetLogLevel(ksi.LogLevelInfo)
 		sig, err := signer.Sign(block.Header.DataHash)
 		if err != nil {
 			logger.Errorf("Unable to sign bytes. Error: %v\n", err.Error())
 		} else {
-			logger.Debug("Signature : ", sig)
-			logger.Debug("Adding the KSI Signature to the Block metadata.")
-			logger.Debug("Now, the metadata array has %d elements",len(block.Metadata.Metadata))
+			logger.Debugf("Adding the KSI Signature to the Block metadata.")
 			signatureBytes, err := sig.Bytes()
 			if err != nil {
 				logger.Errorf("Failed to serialize the KSI Signature to raw bytes. Error: %v\n", err.Error())

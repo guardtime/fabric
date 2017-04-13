@@ -87,7 +87,6 @@ func SendProducerBlockEvent(block *common.Block) error {
 						return fmt.Errorf("Error marshalling tx action payload for block event: %s", err)
 					}
 					payload.Data, err = utils.GetBytesTransaction(tx)
-					logger.Infof("Time to add some bytes to the payload data ...")
 					if err != nil {
 						return fmt.Errorf("Error marshalling payload for block event: %s", err)
 					}

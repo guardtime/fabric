@@ -212,7 +212,6 @@ func (l *kvLedger) Commit(block *common.Block) error {
 	var err error
 	blockNo := block.Header.Number
 
-	logger.Infof("Ryan 4")
 	logger.Debugf("Channel [%s]: Validating block [%d]", l.ledgerID, blockNo)
 	err = l.txtmgmt.ValidateAndPrepare(block, true)
 	if err != nil {
