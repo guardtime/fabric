@@ -91,15 +91,13 @@ func (lc *LedgerCommitter) Commit(block *common.Block) error {
 			logger.Errorf("Unable to sign bytes. Error: %v\n", err.Error())
 		} else {
 			logger.Debug("Signature : ", sig)
+			logger.Debug("Adding the KSI Signature to the Block metadata.")
+			signatureBytes := sig.Bytes()
+			block.Metadata.Metadata = append(block.Metadata.Metadata, signatureBytes);
+			logger.Debug("Now, the metadata array has %d elements",len(block.Metadata.Metadata))
 		}
 	}
 	
-
-
-	logger.Infof("Adding the KSI Signature to the Block metadata.")
-	signature := []byte("Hello ")
-	block.Metadata.Metadata = append(block.Metadata.Metadata, signature);
-	logger.Infof("Now, the metadata array has %d elements",len(block.Metadata.Metadata))
 
 	// send block event *after* the block has been committed
 	if err := producer.SendProducerBlockEvent(block); err != nil {
